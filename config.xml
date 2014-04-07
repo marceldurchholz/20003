@@ -3,10 +3,10 @@
 <!-- config.xml reference: https://build.phonegap.com/docs/config-xml -->
 <widget xmlns     = "http://www.w3.org/ns/widgets"
         xmlns:gap = "http://phonegap.com/ns/1.0"
-        id        = "com.digitalverve.20010"
+        id        = "com.digitalverve.20003"
         version   = "1.0.1">
 
-    <name>20010</name>
+    <name>20003</name>
 
     <description>
         Dies ist eine Mobile Learning App. Wissensdurstigen Nutzern werden Wissensinhalte im Multimediaformat und über Lernsets/Lernkarten angeboten.
@@ -62,12 +62,12 @@
 	
 	<!--- DOCS: https://github.com/EddyVerbruggen/LaunchMyApp-PhoneGap-Plugin#4-url-scheme-hints -->
 	<gap:plugin name="nl.x-services.plugins.launchmyapp">
-	  <param name="URL_SCHEME" value="20010" />
+	  <param name="URL_SCHEME" value="20003" />
 	</gap:plugin>
 	<!--
 	<gap:plugin name="com.phonegap.plugins.facebookconnect">
 		<param name="APP_ID" value="608776825852280" />
-		<param name="APP_NAME" value="20010mobilelogin" />
+		<param name="APP_NAME" value="20003mobilelogin" />
 	</gap:plugin>
 	-->
 	<!--
