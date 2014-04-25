@@ -250,7 +250,7 @@ define(["jquery", "backbone", "text!templates/CardEditNestedPage.html", "text!te
 						else {
 							$('#cardsettitleemtpywarning').html('');
 							console.log('inserting new card');
-							dpd.cards.post({"completed":0,"wrong":0,"correct":0,"active":true,"deleted":false,"public":false,"uploader":""+_thisViewCardEditNested.me.id,"thumbnailurl":"","topic":"Allgemein","cardurl":"","title":"","subtitle":"","description":"","price":"","start":"","end":"","cdate":""+dateYmdHis()}, function(result, err) {
+							dpd.cards.post({"completed":0,"wrong":0,"correct":0,"active":true,"deleted":false,"public":false,"uploader":""+_thisViewCardEditNested.me.id,"thumbnailurl":"","topic":"Allgemein","cardurl":"","title":cardsettitle,"subtitle":"","description":"","price":"","start":"","end":"","cdate":""+dateYmdHis()}, function(result, err) {
 								if(err) return console.log(err);
 								// console.log(result, result.id);
 								// console.log(result);
@@ -429,7 +429,7 @@ define(["jquery", "backbone", "text!templates/CardEditNestedPage.html", "text!te
 							cardData = myObj;
 						}
 						// else cardData = cardDataX;
-						// console.log(cardData);
+						console.log(cardData);
 						
 						_.each(cardData, function(value, index, list) {
 							// console.log(index+" > "+value);
@@ -458,7 +458,9 @@ define(["jquery", "backbone", "text!templates/CardEditNestedPage.html", "text!te
 						
 						if (cardsetid!="") {
 							if (cardsetid==myObj.cardData.id) { 
-								// console.log('foo');
+								console.log('foo');
+								console.log(myObj.cardData);
+								_thisViewCardEditNested.streamData.pagetitle = myObj.cardData.title;
 								var requestUrl = "http://dominik-lohmann.de:5000/cardpages?deleted=false&cardid="+cardsetid; // active=true&
 								$.ajax({
 									url: requestUrl,
