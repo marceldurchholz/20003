@@ -158,7 +158,7 @@ define(["jquery", "backbone", "text!templates/CardEditNestedPage.html", "text!te
 					e.preventDefault();
 					_thisViewCardEditNested.updateCardPageAnswers();
 					return(false);
-					
+					/*
 					if (_thisViewCardEditNested.streamData.activePageArray[0].answers==undefined) _thisViewCardEditNested.streamData.activePageArray[0].answers = new Array();
 					if ((_thisViewCardEditNested.streamData.activePageArray[0].answers.length+1)>5) {
 						doAlert('Mehr als 5 Antworten pro Lernkarte sind derzeit nicht erlaubt.','Aktion nicht möglich');
@@ -179,6 +179,7 @@ define(["jquery", "backbone", "text!templates/CardEditNestedPage.html", "text!te
 					_thisViewCardEditNested.render();
 					return(false);
 					// window.location.href = e.currentTarget.hash;
+					*/
 				});
 				
 				_thisViewCardEditNested.$el.off('click','.editCardpage').on('click','.editCardpage',function(e){
@@ -217,7 +218,6 @@ define(["jquery", "backbone", "text!templates/CardEditNestedPage.html", "text!te
 					var cardsetid = $(this).attr('data-cardsetid');
 					var newquestion = $('#question').val();
 					if (newquestion=='') { $('#questionemtpywarning').html('Sie müssen eine Frage eingeben.'); err=err+1; } else $('#questionemtpywarning').html('');
-					if (newquestion=='') $('#questionemtpywarning').html('Sie müssen eine Frage eingeben.');
 					if (err>0) {
 						hideModal();
 						return(false);
@@ -235,42 +235,33 @@ define(["jquery", "backbone", "text!templates/CardEditNestedPage.html", "text!te
 						});
 					}
 					return(false);
-					
-					var cardpageid = $(this).attr('data-cardpageid');
-					var cardsetid = $(this).attr('data-cardsetid');
-					// alert(cardsetid);
-					// return(false);
-					// alert(cardpageid);
-					var newquestion = $(e.currentTarget).val();
-					// alert(newquestion);
-					if(cardpageid=="0") {
-						if (newquestion=='') $('#questionemtpywarning').html('Sie müssen eine Frage eingeben.');
-						else {
-							$('#questionemtpywarning').html('');
-							console.log('inserting new cardpage');
-							dpd.cardpages.post({"question":''+newquestion, "cardid":''+cardsetid, "active":false, "public":true, "uploader": _thisViewCardEditNested.me.id, "page":""+(_thisViewCardEditNested.streamData.pagesArray.length)}, function(result, err) {
-								if(err) {
-									return console.log(err);
-								}
-								console.log(result);
-								// window.location.href = "#cards/edit/acd1eacd6a69e82e/"+result.id;
-								window.location.href = "#cards/edit/"+cardsetid;
-							});
+				});
+				
+				_thisViewCardEditNested.$el.off('blur','#question').on('blur','#question',function(e){
+					e.preventDefault();
+					if( _thisViewCardEditNested.streamData.view == 'edit') {
+						showModal();
+						var err=0;
+						var cardpageid = $(this).attr('data-cardpageid');
+						var newquestion = $('#question').val();
+						if (newquestion=='') { $('#questionemtpywarning').html('Sie müssen eine Frage eingeben.'); err=err+1; } else $('#questionemtpywarning').html('');
+						if (err>0) {
+							hideModal();
+							return(false);
 						}
-					}
-					if(cardpageid!="0") {
-						if (newquestion=='') $('#questionemtpywarning').html('Sie müssen eine Frage eingeben.');
 						else {
-							$('#questionemtpywarning').html('');
 							dpd.cardpages.put(cardpageid, {"question":''+newquestion}, function(result, err) {
 								if(err) {
+									hideModal();
 									return console.log(err);
-									// hideModal();
 								}
+								// hideModal();
+								var data = new Object();
+								data.options = _thisViewCardEditNested.options;
+								_thisViewCardEditNested.fetch(data);
 							});
 						}
 					}
-					hideModal();
 					return(false);
 				});
 				
@@ -316,17 +307,37 @@ define(["jquery", "backbone", "text!templates/CardEditNestedPage.html", "text!te
 				
 				_thisViewCardEditNested.$el.off('change','.activatecardcb').on('change','.activatecardcb',function(e){
 					e.preventDefault();
-					// alert('change triggered');
-					// _thisViewCardEditNested.updateCardPageAnswers();
-					var cardpageid = $(this).attr('data-cardpageid');
-					// alert(cardpageid);
+					showModal();
+					var cardsetid = $(this).attr('data-cardsetid');
 					var isactive = $(this).is(":checked");
-					dpd.cardpages.put(cardpageid, {"active":isactive}, function(result, err) {
+					dpd.cardpages.put(cardsetid, {"active":isactive}, function(result, err) {
 						if(err) {
+							hideModal();
 							return console.log(err);
-							// hideModal();
 						}
 					});
+					return(false);
+				});
+				
+				_thisViewCardEditNested.$el.off('change','.activatecardsetcb').on('change','.activatecardsetcb',function(e){
+					e.preventDefault();
+					var isactive = $(this).is(":checked"); // $(this).val();
+					// if (isactive==true) var solution = "1"; else solution = "0";
+					var cardsetid = $(this).attr('data-cardsetid');
+					// alert(cardsetid);
+					dpd.cards.put(cardsetid, {"active":isactive}, function(result, err) {
+						if(err) {
+							hideModal();
+							return console.log(err);
+						}
+						var href = $(this).attr('href');
+						window.location.href = '#cards/edit/'+cardsetid;
+					});
+					return(false);					
+
+					// alert('change triggered');
+					// alert('bla');
+					// _thisViewCardEditNested.updateCardPageAnswers();
 					return(false);
 				});
 				
@@ -352,11 +363,27 @@ define(["jquery", "backbone", "text!templates/CardEditNestedPage.html", "text!te
 					// alert(cardsetid);
 					dpd.cardpages.put(cardpageid, {"deleted":true}, function(result, err) {
 						if(err) {
-							return console.log(err);
 							hideModal();
+							return console.log(err);
 						}
 						var href = $(this).attr('href');
 						window.location.href = '#cards/edit/'+cardsetid;
+					});
+					return(false);					
+				});
+				
+				_thisViewCardEditNested.$el.off('click','.deleteCardSetBtn').on('click','.deleteCardSetBtn',function(e){
+					e.preventDefault();
+					showModal();
+					var cardsetid = $(this).attr('data-cardsetid');
+					// alert(cardsetid);
+					dpd.cards.put(cardsetid, {"deleted":true}, function(result, err) {
+						if(err) {
+							hideModal();
+							return console.log(err);
+						}
+						var href = $(this).attr('href');
+						window.location.href = '#cards/edit';
 					});
 					return(false);					
 				});
@@ -505,6 +532,7 @@ define(["jquery", "backbone", "text!templates/CardEditNestedPage.html", "text!te
 												pagevalue.selected=true;
 												_thisViewCardEditNested.streamData.activePageArray[0] = pagevalue;
 												var newanswerObject = new Object();
+												if (_thisViewCardEditNested.streamData.activePageArray[0].answers==undefined) _thisViewCardEditNested.streamData.activePageArray[0].answers = new Array();
 												newanswerObject.id = (_thisViewCardEditNested.streamData.activePageArray[0].answers.length+1);
 												newanswerObject.solution = "0";
 												newanswerObject.text = "";
