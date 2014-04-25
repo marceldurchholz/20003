@@ -101,11 +101,11 @@ define(["jquery", "backbone", "text!templates/CardEditNestedPage.html", "text!te
 							}
 						});
 						if (newanswerObject.text!='') {
-							newanswerArray.push(newanswerObject);
 							answerOrder = answerOrder + 1;
+							newanswerArray.push(newanswerObject);
 						}
 						else {
-							_thisRow.remove();
+							// _thisRow.remove();
 							// delete row in the view
 						}
 					}
@@ -119,7 +119,15 @@ define(["jquery", "backbone", "text!templates/CardEditNestedPage.html", "text!te
 					}
 					console.log(result.answers);
 					_thisViewCardEditNested.streamData.activePageArray[0].answers = result.answers;
-					// _thisViewCardEditNested.render();
+					
+					var newanswerObject = new Object();
+					newanswerObject.id = (_thisViewCardEditNested.streamData.activePageArray[0].answers.length+1);
+					newanswerObject.solution = "0";
+					newanswerObject.text = "";
+					console.log(newanswerObject);
+					_thisViewCardEditNested.streamData.activePageArray[0].answers.push(newanswerObject);
+
+					_thisViewCardEditNested.render();
 				});
 				hideModal();
 			},
@@ -148,6 +156,9 @@ define(["jquery", "backbone", "text!templates/CardEditNestedPage.html", "text!te
 				
 				_thisViewCardEditNested.$el.off('click','#addAnswerBtn').on('click','#addAnswerBtn',function(e){
 					e.preventDefault();
+					_thisViewCardEditNested.updateCardPageAnswers();
+					return(false);
+					
 					if (_thisViewCardEditNested.streamData.activePageArray[0].answers==undefined) _thisViewCardEditNested.streamData.activePageArray[0].answers = new Array();
 					if ((_thisViewCardEditNested.streamData.activePageArray[0].answers.length+1)>5) {
 						doAlert('Mehr als 5 Antworten pro Lernkarte sind derzeit nicht erlaubt.','Aktion nicht möglich');
@@ -197,9 +208,34 @@ define(["jquery", "backbone", "text!templates/CardEditNestedPage.html", "text!te
 					// window.location.href = e.currentTarget.hash;
 				});
 				
-				_thisViewCardEditNested.$el.off('blur','#question').on('blur','#question',function(e){
+				// _thisViewCardEditNested.$el.off('blur','#question').on('blur','#question',function(e){
+				// _thisViewCardEditNested.$el.off('blur','#cardsettitle').on('blur','#cardsettitle',function(e){
+				_thisViewCardEditNested.$el.off('click','.createCardPageBtn').on('click','.createCardPageBtn',function(e){
 					e.preventDefault();
 					showModal();
+					var err=0;
+					var cardsetid = $(this).attr('data-cardsetid');
+					var newquestion = $('#question').val();
+					if (newquestion=='') { $('#questionemtpywarning').html('Sie müssen eine Frage eingeben.'); err=err+1; } else $('#questionemtpywarning').html('');
+					if (newquestion=='') $('#questionemtpywarning').html('Sie müssen eine Frage eingeben.');
+					if (err>0) {
+						hideModal();
+						return(false);
+					}
+					else {
+						$('#questionemtpywarning').html('');
+						console.log('inserting new cardpage');
+						dpd.cardpages.post({"question":''+newquestion, "cardid":''+cardsetid, "active":false, "public":true, "uploader": _thisViewCardEditNested.me.id, "page":"0"}, function(result, err) {
+							if(err) {
+								return console.log(err);
+							}
+							console.log(result);
+							// window.location.href = "#cards/edit/acd1eacd6a69e82e/"+result.id;
+							window.location.href = "#cards/edit/"+cardsetid;
+						});
+					}
+					return(false);
+					
 					var cardpageid = $(this).attr('data-cardpageid');
 					var cardsetid = $(this).attr('data-cardsetid');
 					// alert(cardsetid);
@@ -238,31 +274,26 @@ define(["jquery", "backbone", "text!templates/CardEditNestedPage.html", "text!te
 					return(false);
 				});
 				
-				_thisViewCardEditNested.$el.off('blur','#cardsettitle').on('blur','#cardsettitle',function(e){
+				// _thisViewCardEditNested.$el.off('blur','#cardsettitle').on('blur','#cardsettitle',function(e){
+				_thisViewCardEditNested.$el.off('click','.createCardSetBtn').on('click','.createCardSetBtn',function(e){
 					e.preventDefault();
 					showModal();
 					var cardsetid = $(this).attr('data-cardsetid');
-					var cardsettitle = $(e.currentTarget).val();
-					// alert(cardsettitle);
-					// return(false);
+					// alert(cardsetid);
+					var cardsettitle = $('#cardsettitle').val();   // $(e.currentTarget).val();
+					var cardsetdescription = $('#cardsetdescription').val();   // $(e.currentTarget).val();
+					var err = 0;
 					if(cardsetid=="0") {
-						if (cardsettitle=='') $('#cardsettitleemtpywarning').html('Sie müssen einen Titel eingeben.');
+						if (cardsettitle=='') { $('#cardsettitleemtpywarning').html('Sie müssen einen Titel eingeben.'); err=err+1; } else $('#cardsettitleemtpywarning').html('');
+						// if (cardsetdescription=='') { $('#cardsetdescriptionemtpywarning').html('Sie müssen eine Beschreibung eingeben.'); err=err+1; } else $('#cardsetdescriptionemtpywarning').html('');
+						if (err>0) {
+							hideModal();
+							return(false);
+						}
 						else {
-							$('#cardsettitleemtpywarning').html('');
 							console.log('inserting new card');
-							dpd.cards.post({"completed":0,"wrong":0,"correct":0,"active":true,"deleted":false,"public":false,"uploader":""+_thisViewCardEditNested.me.id,"thumbnailurl":"","topic":"Allgemein","cardurl":"","title":cardsettitle,"subtitle":"","description":"","price":"","start":"","end":"","cdate":""+dateYmdHis()}, function(result, err) {
+							dpd.cards.post({"completed":0,"wrong":0,"correct":0,"active":true,"deleted":false,"public":false,"uploader":""+_thisViewCardEditNested.me.id,"thumbnailurl":"","topic":"Allgemein","cardurl":"","title":cardsettitle,"subtitle":"","description":cardsetdescription,"price":"","start":"","end":"","cdate":""+dateYmdHis()}, function(result, err) {
 								if(err) return console.log(err);
-								// console.log(result, result.id);
-								// console.log(result);
-								// console.log(data);
-								// _thisViewCardEditNested.options.cardsetid = result.id;
-								// var data = new Object();
-								// data.options = _thisViewCardEditNested.options;
-								// console.log(data);
-								// console.log(_thisViewCardEditNested.options);
-								// console.log(data);
-								// _thisViewCardEditNested.fetch(data);
-								// alert('redirecting to cardsetid '+result.id);
 								window.location.href = "#cards/edit/"+result.id;
 							});
 						}
@@ -436,7 +467,6 @@ define(["jquery", "backbone", "text!templates/CardEditNestedPage.html", "text!te
 							// console.log(value.uploader,_thisViewCardEditNested.me.id);
 							if ((window.system.master==true && value.public==true) || value.uploader==_thisViewCardEditNested.me.id) { 
 								// console.log('bla');
-								
 								if (_thisViewCardEditNested.userArray == undefined) _thisViewCardEditNested.userArray = new Array();
 								if (_thisViewCardEditNested.userArray[value.uploader] != undefined) {
 									value.uploaderdata = _thisViewCardEditNested.userArray[value.uploader];
@@ -474,6 +504,12 @@ define(["jquery", "backbone", "text!templates/CardEditNestedPage.html", "text!te
 											if (_thisViewCardEditNested.options.pageid == pagevalue.id) {
 												pagevalue.selected=true;
 												_thisViewCardEditNested.streamData.activePageArray[0] = pagevalue;
+												var newanswerObject = new Object();
+												newanswerObject.id = (_thisViewCardEditNested.streamData.activePageArray[0].answers.length+1);
+												newanswerObject.solution = "0";
+												newanswerObject.text = "";
+												console.log(newanswerObject);
+												_thisViewCardEditNested.streamData.activePageArray[0].answers.push(newanswerObject);
 											}
 											else {
 												pagevalue.selected=false;
@@ -505,6 +541,7 @@ define(["jquery", "backbone", "text!templates/CardEditNestedPage.html", "text!te
 			},
 			render: function() {
 				_thisViewCardEditNested = this;
+				console.log('rendering...');
 				// console.log(_thisViewCardEditNested.streamData);
 				_thisViewCardEditNested.$el.html(_.template(_thisViewCardEditNested.displaySubPage, {
 					data: _thisViewCardEditNested.streamData
