@@ -283,7 +283,7 @@ define(["jquery", "backbone", "text!templates/CardEditNestedPage.html", "text!te
 						}
 						else {
 							console.log('inserting new card');
-							dpd.cards.post({"completed":0,"wrong":0,"correct":0,"active":true,"deleted":false,"public":false,"uploader":""+_thisViewCardEditNested.me.id,"thumbnailurl":"","topic":"Allgemein","cardurl":"","title":cardsettitle,"subtitle":"","description":cardsetdescription,"price":"","start":"","end":"","cdate":""+dateYmdHis()}, function(result, err) {
+							dpd.cards.post({"completed":0,"wrong":0,"correct":0,"active":true,"deleted":false,"public":false,"uploader":""+_thisViewCardEditNested.me.id,"thumbnailurl":"","topic":"Allgemein","cardurl":"","title":cardsettitle,"subtitle":"","description":cardsetdescription,"price":"0","start":"","end":"","cdate":""+dateYmdHis()}, function(result, err) {
 								if(err) return console.log(err);
 								window.location.href = "#cards/edit/"+result.id;
 							});
