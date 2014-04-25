@@ -308,13 +308,14 @@ define(["jquery", "backbone", "text!templates/CardEditNestedPage.html", "text!te
 				_thisViewCardEditNested.$el.off('change','.activatecardcb').on('change','.activatecardcb',function(e){
 					e.preventDefault();
 					showModal();
-					var cardsetid = $(this).attr('data-cardsetid');
+					var cardpageid = $(this).attr('data-cardpageid');
 					var isactive = $(this).is(":checked");
-					dpd.cardpages.put(cardsetid, {"active":isactive}, function(result, err) {
+					dpd.cardpages.put(cardpageid, {"active":isactive}, function(result, err) {
 						if(err) {
 							hideModal();
 							return console.log(err);
 						}
+						hideModal();
 					});
 					return(false);
 				});
@@ -322,22 +323,26 @@ define(["jquery", "backbone", "text!templates/CardEditNestedPage.html", "text!te
 				_thisViewCardEditNested.$el.off('change','.activatecardsetcb').on('change','.activatecardsetcb',function(e){
 					e.preventDefault();
 					var isactive = $(this).is(":checked"); // $(this).val();
-					// if (isactive==true) var solution = "1"; else solution = "0";
 					var cardsetid = $(this).attr('data-cardsetid');
-					// alert(cardsetid);
+					var href = $(this).attr('href');
 					dpd.cards.put(cardsetid, {"active":isactive}, function(result, err) {
 						if(err) {
-							hideModal();
 							return console.log(err);
 						}
-						var href = $(this).attr('href');
 						window.location.href = '#cards/edit/'+cardsetid;
 					});
-					return(false);					
-
-					// alert('change triggered');
-					// alert('bla');
-					// _thisViewCardEditNested.updateCardPageAnswers();
+					return(false);
+				});
+				
+				_thisViewCardEditNested.$el.off('change','.publiccardsetcb').on('change','.publiccardsetcb',function(e){
+					e.preventDefault();
+					var ispublic = $(this).is(":checked"); // $(this).val();
+					var cardsetid = $(this).attr('data-cardsetid');
+					dpd.cards.put(cardsetid, {"public":ispublic}, function(result, err) {
+						if(err) {
+							return console.log(err);
+						}
+					});
 					return(false);
 				});
 				
@@ -354,37 +359,44 @@ define(["jquery", "backbone", "text!templates/CardEditNestedPage.html", "text!te
 					return(false);
 				});
 				
-				_thisViewCardEditNested.$el.off('click','.deleteCardPageBtn').on('click','.deleteCardPageBtn',function(e){
+				_thisViewCardEditNested.$el.off('click','.deleteCardSetBtn').on('click','.deleteCardSetBtn',function(e){
 					e.preventDefault();
-					showModal();
-					var cardpageid = $(this).attr('data-cardpageid');
-					// alert(cardpageid);
 					var cardsetid = $(this).attr('data-cardsetid');
-					// alert(cardsetid);
-					dpd.cardpages.put(cardpageid, {"deleted":true}, function(result, err) {
-						if(err) {
-							hideModal();
-							return console.log(err);
+					var href = $(this).attr('href');
+					doConfirm('Möchten Sie dieses Lernset wirklich löschen?', 'Achtung!', function (event) { 
+						if (event!="1") return(false);
+						else {
+							showModal();
+							dpd.cards.put(cardsetid, {"deleted":true}, function(result, err) {
+								if(err) {
+									hideModal();
+									return console.log(err);
+								}
+								window.location.href = '#cards/edit';
+							});
 						}
-						var href = $(this).attr('href');
-						window.location.href = '#cards/edit/'+cardsetid;
-					});
+					}, undefined);
 					return(false);					
 				});
 				
-				_thisViewCardEditNested.$el.off('click','.deleteCardSetBtn').on('click','.deleteCardSetBtn',function(e){
+				_thisViewCardEditNested.$el.off('click','.deleteCardPageBtn').on('click','.deleteCardPageBtn',function(e){
 					e.preventDefault();
-					showModal();
+					var cardpageid = $(this).attr('data-cardpageid');
 					var cardsetid = $(this).attr('data-cardsetid');
-					// alert(cardsetid);
-					dpd.cards.put(cardsetid, {"deleted":true}, function(result, err) {
-						if(err) {
-							hideModal();
-							return console.log(err);
+					var href = $(this).attr('href');
+					doConfirm('Möchten Sie diese Lernkarte wirklich löschen?', 'Achtung!', function (event) { 
+						if (event!="1") return(false);
+						else {
+							showModal();
+							dpd.cardpages.put(cardpageid, {"deleted":true}, function(result, err) {
+								if(err) {
+									hideModal();
+									return console.log(err);
+								}
+								window.location.href = '#cards/edit/'+cardsetid;
+							});
 						}
-						var href = $(this).attr('href');
-						window.location.href = '#cards/edit';
-					});
+					}, undefined);
 					return(false);					
 				});
 				
@@ -517,6 +529,7 @@ define(["jquery", "backbone", "text!templates/CardEditNestedPage.html", "text!te
 							if (cardsetid==myObj.cardData.id) { 
 								console.log('foo');
 								console.log(myObj.cardData);
+								_thisViewCardEditNested.streamData.active = myObj.cardData.active;
 								_thisViewCardEditNested.streamData.pagetitle = myObj.cardData.title;
 								var requestUrl = "http://dominik-lohmann.de:5000/cardpages?deleted=false&cardid="+cardsetid; // active=true&
 								$.ajax({

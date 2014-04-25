@@ -221,7 +221,7 @@ img { border: 0; max-width: 100%; }
 	padding-left:5px;
 }
 
-.ui-btn-up-a  > * {
+.ui-btn-up-a, .ui-btn-hover-a  > * {
 	font-weight:normal !important;
 }
 
